@@ -14,6 +14,8 @@ let bossName = "", hp = "", timestarted = 0;
 
 const eHpEntity = () => !!hpEntity;
 const resetBossTracker = () => [timestarted, bossID, hpEntity, timerEntity] = [0, null, null, null];
+let lastHpUpdate = 0;
+const maxDisplayTime = 5000;
 
 slayerbossdisplay
     .register("stepFps", () => {
@@ -24,6 +26,7 @@ slayerbossdisplay
             const match = name.match(BOSS_HP_REGEX);
             if (match) {
                 [bossName, hp] = [match[1], match[2]];
+                lastHpUpdate = Date.now();
                 slayerbossdisplay.update()
             }
         });
@@ -39,7 +42,7 @@ slayerbossdisplay
     Renderer.drawStringWithShadow(`&c☠ &b${bossName}`, 0, 10);
     Renderer.retainTransforms(false);
     Renderer.finishDraw()
-}, () => eHpEntity())
+}, () => eHpEntity()) && Date.now() - lastHpUpdate < maxDisplayTime
 
 register(Java.type("net.minecraftforge.event.entity.EntityJoinWorldEvent"), (entity) => {
     if (settings().slayerbossdisplay || settings().slayerkilltimer) {
